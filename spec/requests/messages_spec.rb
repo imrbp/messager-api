@@ -9,6 +9,15 @@ RSpec.describe 'Messages API', type: :request do
   let(:samid_headers) { valid_headers(samid) }
 
   # TODO: create conversation between Dimas and Agus, then set convo_id variable
+  let(:user2) { create(:user) }
+  let(:user3) { create(:user) }
+  let(:user4) { create(:user) }
+  let(:user5) { create(:user) }
+  let!(:conversation1) { create(:conversation, users: [dimas, user2]) }
+  let!(:conversation1) { create(:conversation, users: [dimas, user3]) }
+  let!(:conversation1) { create(:conversation, users: [dimas, user4]) }
+  let!(:conversation1) { create(:conversation, users: [dimas, user5]) }
+  let(:convo_id) { conversation1.id }
 
   describe 'get list of messages' do
     context 'when user have conversation with other user' do
@@ -34,6 +43,9 @@ RSpec.describe 'Messages API', type: :request do
 
     context 'when user try to access conversation not belong to him' do
       # TODO: create conversation and set convo_id variable
+      let(:user2) { create(:user) }
+      let!(:conversation1) { create(:conversation, users: [dimas, user2]) }
+      let(:convo_id) { conversation1.id }
       before { get "/conversations/#{convo_id}/messages", params: {}, headers: samid_headers }
 
       it 'returns error 403' do
@@ -43,6 +55,9 @@ RSpec.describe 'Messages API', type: :request do
 
     context 'when user try to access invalid conversation' do
       # TODO: create conversation and set convo_id variable
+      let(:user2) { create(:user) }
+      let!(:conversation1) { create(:conversation, users: [samid, user2]) }
+      let(:convo_id) { conversation1.id }
       before { get "/conversations/-11/messages", params: {}, headers: samid_headers }
 
       it 'returns error 404' do
@@ -89,7 +104,9 @@ RSpec.describe 'Messages API', type: :request do
 
     context 'when create message into existing conversation' do
       before { post "/messages", params: valid_attributes, headers: dimas_headers}
-
+      let(:user2) { create(:user) }
+      let!(:conversation1) { create(:conversation, users: [dimas, user2]) }
+      let(:convo_id) { conversation1.id }
       it 'returns status code 201 (created) and create conversation automatically' do
         expect_response(
           :created,
